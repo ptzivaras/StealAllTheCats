@@ -60,7 +60,50 @@ namespace StealAllTheCats.Controllers
         }
     
         //First Endpoint(Post 25 cats in LocalServer after you get them from Cat Server)
-        //
+        //POST /api/cats/fetch
+        [HttpPost("fetch")]
+        public async Task<IActionResult> SaveUniqueCats()
+        {
+            string apiUrl = "https://api.thecatapi.com/v1/images/search?limit=25";
+            var response = await _httpClient.GetAsync(apiUrl);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode((int)response.StatusCode, "Failed to fetch cats from TheCatAPI");
+            }
+
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            var fetchedCats = JsonSerializer.Deserialize<List<CatApiResponse>>(jsonResponse);
+
+            if (fetchedCats == null || fetchedCats.Count == 0)
+            {
+                return BadRequest("No cats found.");
+            }
+
+            // Convert API response into `CatEntity`
+            var newCats = fetchedCats.Select(cat => new CatEntity
+            {
+                CatId = cat.id,
+                Width = cat.width,
+                Height = cat.height,
+                ImageUrl = cat.url,
+                Created = DateTime.UtcNow // Set the created timestamp manually
+            }).ToList();
+
+            // Check for duplicates before inserting
+            var existingCatIds = _context.Cats.Select(c => c.CatId).ToList();
+            var uniqueCats = newCats.Where(c => !existingCatIds.Contains(c.CatId)).ToList();
+
+            if (uniqueCats.Any())
+            {
+                _context.Cats.AddRange(uniqueCats);
+                await _context.SaveChangesAsync();
+                return Ok($"Successfully added {uniqueCats.Count} new cats.");
+            }
+            
+            return Ok("No new cats were added (duplicates detected).");
+        }
+
 
         //Second EndPoint(Get Cat By id)
         //GET /api/cats/{id}:
