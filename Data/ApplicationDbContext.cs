@@ -8,5 +8,26 @@ namespace StealAllTheCats.Data
 
         public DbSet<CatEntity> Cats { get; set; }
         public DbSet<TagEntity> Tags { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    // Define composite key for CatTag
+    modelBuilder.Entity<CatTag>()
+        .HasKey(ct => new { ct.CatEntityId, ct.TagEntityId });
+
+    // Define relationships
+    modelBuilder.Entity<CatTag>()
+        .HasOne(ct => ct.CatEntity)
+        .WithMany(c => c.CatTags)
+        .HasForeignKey(ct => ct.CatEntityId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+    modelBuilder.Entity<CatTag>()
+        .HasOne(ct => ct.TagEntity)
+        .WithMany(t => t.CatTags)
+        .HasForeignKey(ct => ct.TagEntityId)
+        .OnDelete(DeleteBehavior.Cascade);
+}
+
     }
 }
