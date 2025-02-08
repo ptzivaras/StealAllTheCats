@@ -64,7 +64,8 @@ namespace StealAllTheCats.Controllers
         [HttpPost("fetch")]
         public async Task<IActionResult> SaveUniqueCats()
         {
-            string apiUrl = "https://api.thecatapi.com/v1/images/search?limit=25";
+            string apiKey = "live_r28aR40CbiGE2ucr7fiQVsNiCfACtX0VopUMAMWk1YCxiUxOCgIB06gUcsr3vwrN";
+            string apiUrl = $"https://api.thecatapi.com/v1/images/search?limit=25&api_key={apiKey}";
             var response = await _httpClient.GetAsync(apiUrl);
 
             if (!response.IsSuccessStatusCode)
