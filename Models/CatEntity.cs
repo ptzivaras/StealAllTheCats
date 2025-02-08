@@ -33,7 +33,15 @@ namespace StealAllTheCats.Models{
          public string url { get; set; }
          public int width { get; set; }
          public int height { get; set; }
+         public string temperament {get;set;}
+         public List<Breed> breeds { get; set; }
      }
+
+     public class Breed
+{
+    public string name { get; set; }
+    public string temperament { get; set; }  // The temperament for each breed
+}
 
      
 }
