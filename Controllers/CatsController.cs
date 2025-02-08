@@ -119,46 +119,12 @@ namespace StealAllTheCats.Controllers
             return Ok(cat); // Returns raw JSON response from TheCatAPI
         }
     
-        //Third Endpoint(Retrieve Cats with paging support)
-        //GET /api/cats?page=1&pageSize=10
-        [HttpGet]
-        public async Task<IActionResult> GetCats([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-        {
-            // Check for valid page and pageSize values
-            if (page < 1 || pageSize < 1)
-            {
-                return BadRequest("Page and pageSize must be greater than 0.");
-            }
 
-            // Get the total count of cats in the database
-            var totalCats = await _context.Cats.CountAsync();
 
-            // Retrieve cats with pagination (skip and take based on page and pageSize)
-            var cats = await _context.Cats
-                .Include(c => c.CatTags) // Include tags if needed
-                .ThenInclude(ct => ct.TagEntity) // Include the related TagEntity for each tag
-                .OrderBy(c => c.Id) // Sorting by ID for consistency
-                .Skip((page - 1) * pageSize) // Skip previous pages
-                .Take(pageSize) // Take only the number of cats specified by pageSize
-                .ToListAsync();
-
-            // Prepare the response with pagination information
-            var response = new
-            {
-                TotalCats = totalCats,
-                Page = page,
-                PageSize = pageSize,
-                TotalPages = (int)Math.Ceiling((double)totalCats / pageSize),
-                Data = cats
-            };
-
-            return Ok(response); // Return the paginated response
-        }
-
-        //Fourth Endpoint(Retrieve cats with a specific tag and paging support)
+        //Third and Fourth Endpoint(Retrieve cats with a specific tag and paging support)
         //GET /api/cats?tag=playful&page=1&pageSize=10
-        [HttpGet("search")]
-        public async Task<IActionResult> GetCatsByTag([FromQuery] string tag, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        [HttpGet]
+        public async Task<IActionResult> GetCatsByTag([FromQuery] string? tag=null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             if (page < 1 || pageSize < 1)
             {
