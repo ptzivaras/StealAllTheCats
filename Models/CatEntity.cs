@@ -9,16 +9,17 @@ namespace StealAllTheCats.Models{
         //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        //[Required]
+        [Required(ErrorMessage = "CatId is required.")]
         public string CatId { get; set; }
 
-        //[Required]
+        [Range(1, 5000, ErrorMessage = "Width must be between 1 and 5000.")]
         public int Width { get; set; }
 
-        //[Required]
+        [Range(1, 5000, ErrorMessage = "Height must be between 1 and 5000.")]
         public int Height { get; set; }
 
-        //[Required]
+        [Required(ErrorMessage = "Image URL is required.")]
+        [Url(ErrorMessage = "Invalid image URL.")]
         public string ImageUrl { get; set; }
 
         public DateTime Created { get; set; } = DateTime.UtcNow;

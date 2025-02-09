@@ -40,77 +40,13 @@ namespace StealAllTheCats.Controllers
             _context = context;
 
         }
-        
-        
-        
-        // //First Endpoint(Post 25 cats in LocalServer after you get them from Cat Server)
-        // //POST /api/cats/fetch
-        // [HttpPost("fetch")]
-        // public async Task<IActionResult> SaveUniqueCats()
-        // {
-        //     string apiKey = "live_r28aR40CbiGE2ucr7fiQVsNiCfACtX0VopUMAMWk1YCxiUxOCgIB06gUcsr3vwrN";
-        //     string apiUrl = $"https://api.thecatapi.com/v1/images/search?limit=25&api_key={apiKey}";
-        //     var response = await _httpClient.GetAsync(apiUrl);
-
-        //     if (!response.IsSuccessStatusCode)
-        //     {
-        //         return StatusCode((int)response.StatusCode, "Failed to fetch cats from TheCatAPI");
-        //     }
-
-        //     var jsonResponse = await response.Content.ReadAsStringAsync();
-        //     var fetchedCats = JsonSerializer.Deserialize<List<CatApiResponse>>(jsonResponse);
-
-        //     if (fetchedCats == null || fetchedCats.Count == 0)
-        //     {
-        //         return BadRequest("No cats found.");
-        //     }
-
-        //     // Convert API response into `CatEntity`
-        //     var newCats = fetchedCats
-        //     .Where(cat => !string.IsNullOrEmpty(cat.temperament))
-        //     .Select(cat => new CatEntity
-        //     {
-        //         CatId = cat.id,
-        //         Width = cat.width,
-        //         Height = cat.height,
-        //         ImageUrl = cat.url,
-        //         Created = DateTime.UtcNow // Set the created timestamp manually
-        //     }).ToList();
-
-        //     // Check for duplicates before inserting
-        //     var existingCatIds = _context.Cats.Select(c => c.CatId).ToList();
-        //     var uniqueCats = newCats.Where(c => !existingCatIds.Contains(c.CatId)).ToList();
-
-        //     if (uniqueCats.Any())
-        //     {
-        //         _context.Cats.AddRange(uniqueCats);
-        //         await _context.SaveChangesAsync();
-        //         return Ok($"Successfully added {uniqueCats.Count} new cats.");
-        //     }
-            
-        //     return Ok("No new cats were added (duplicates detected or no temperament).");
-        // }
-        
-        
-        
+ 
         //First Endpoint(Post 25 cats in LocalServer after you get them from Cat Server)
         //POST /api/cats/fetch
         
         [HttpPost("fetch")]
         public async Task<IActionResult> SaveUniqueCats()
         {
-            //[FromBody] CatDTO catDTO
-            // Check if the DTO is valid
-            // if (!ModelState.IsValid)
-            // {
-            //     var errorMessages = ModelState.Values
-            //         .SelectMany(v => v.Errors)
-            //         .Select(e => e.ErrorMessage)
-            //         .ToList();
-
-            //     return BadRequest(new { Errors = errorMessages });
-            // }
-
             string apiKey = "live_r28aR40CbiGE2ucr7fiQVsNiCfACtX0VopUMAMWk1YCxiUxOCgIB06gUcsr3vwrN"; // Replace with your actual API key
             string apiUrl = $"https://api.thecatapi.com/v1/images/search?limit=25&api_key={apiKey}";
             var response = await _httpClient.GetAsync(apiUrl);
@@ -130,8 +66,6 @@ namespace StealAllTheCats.Controllers
 
             // Convert API response into `CatEntity` and save tags
             var newCats = new List<CatEntity>();
-
-            //return Ok(fetchedCats);
 
             foreach (var cat in fetchedCats)
             {
