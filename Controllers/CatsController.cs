@@ -19,6 +19,9 @@ using StealAllTheCats.Dtos;
 
 namespace StealAllTheCats.Controllers
 {
+    /// <summary>
+    /// API Controller for Managing Cats
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class CatsController : ControllerBase
@@ -38,7 +41,6 @@ namespace StealAllTheCats.Controllers
  
         //First Endpoint(Post 25 cats in LocalServer after you get them from Cat Server)
         //POST /api/cats/fetch
-        
         [HttpPost("fetch")]
         public async Task<IActionResult> SaveUniqueCats()
         {
@@ -187,9 +189,17 @@ namespace StealAllTheCats.Controllers
     
 
 
-        //Third and Fourth Endpoint(Retrieve cats with a specific tag and paging support)
-        //GET /api/cats?tag=playful&page=1&pageSize=10
+
+        /// <summary>
+        /// Retrieves Posted Cats
+        /// </summary>
+        /// <param name="Tag"> Optional Filter By Tag</param>
+        /// <returns> Paginated List of Cats </returns>
+        /// <response code="200">Return the list of cats</response>
+        /// <response code="400">Request parameters are inavalid</response>
         [HttpGet]
+        [ProducesResponseType(typeof(List<CatDto>), 200)]
+        [ProducesResponseType(400)]
         public async Task<IActionResult> GetCatsByTag([FromQuery] string? tag=null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             if (page < 1 || pageSize < 1)

@@ -171,3 +171,5 @@ E:\2.CodeTools\FullstackProjects\StealAllTheCats\bin\Debug\net8.0\runtimes\win\l
 E:\2.CodeTools\FullstackProjects\StealAllTheCats\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
 E:\2.CodeTools\FullstackProjects\StealAllTheCats\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
 E:\2.CodeTools\FullstackProjects\StealAllTheCats\obj\Debug\net8.0\StealAllTheCats.sourcelink.json
+E:\2.CodeTools\FullstackProjects\StealAllTheCats\bin\Debug\net8.0\StealAllTheCats.xml
+E:\2.CodeTools\FullstackProjects\StealAllTheCats\obj\Debug\net8.0\StealAllTheCats.xml

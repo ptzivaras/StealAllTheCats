@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>StealAllTheCats</name>
+    </assembly>
+    <members>
+        <member name="T:StealAllTheCats.Controllers.CatsController">
+            <summary>
+            API Controller for Managing Cats
+            </summary>
+        </member>
+        <member name="M:StealAllTheCats.Controllers.CatsController.GetCatsByTag(System.String,System.Int32,System.Int32)">
+            <summary>
+            Retrieves Posted Cats
+            </summary>
+            <param name="Tag"> Optional Filter By Tag</param>
+            <returns> Paginated List of Cats </returns>
+            <response code="200">Return the list of cats</response>
+            <response code="400">Request parameters are inavalid</response>
+        </member>
+        <member name="T:StealAllTheCats.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:StealAllTheCats.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StealAllTheCats.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StealAllTheCats.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>
