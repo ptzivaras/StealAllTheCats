@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
+using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using StealAllTheCats.Data;
 
@@ -13,7 +13,22 @@ var builder = WebApplication.CreateBuilder(args);//? τι κανει?
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
 
-builder.Services.AddControllers(); //new υποστιριξη για controlers 
+builder.Services.AddControllers(); //Support for  controlers 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Cats API",
+        Version = "v1",
+        Description = "API for managing cat images and tags",
+       
+    });
+
+    // Enable XML comments if needed
+    var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -26,7 +41,18 @@ var app = builder.Build();
 //    app.UseSwagger();
 //    app.UseSwaggerUI();
 //}
-
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Cats API v1");
+        options.RoutePrefix = "swagger"; // API documentation will be available at /swagger
+    });
+}
+app.UseHttpsRedirection();
+app.UseAuthorization();
 //app.UseHttpsRedirection(); //τι ειναι αυτο μηπως δεν το χρειαζομαι?
 
 // Προσθέτουμε τους Controllers στο API
