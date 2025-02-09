@@ -18,6 +18,7 @@ using System.Linq;
 using System.Data; 
 using StealAllTheCats.Models;
 using StealAllTheCats.Data;
+using StealAllTheCats.DTOs;
 
 
 //namespace MyApp.Namespace
@@ -98,6 +99,18 @@ namespace StealAllTheCats.Controllers
         [HttpPost("fetch")]
         public async Task<IActionResult> SaveUniqueCats()
         {
+            //[FromBody] CatDTO catDTO
+            // Check if the DTO is valid
+            // if (!ModelState.IsValid)
+            // {
+            //     var errorMessages = ModelState.Values
+            //         .SelectMany(v => v.Errors)
+            //         .Select(e => e.ErrorMessage)
+            //         .ToList();
+
+            //     return BadRequest(new { Errors = errorMessages });
+            // }
+
             string apiKey = "live_r28aR40CbiGE2ucr7fiQVsNiCfACtX0VopUMAMWk1YCxiUxOCgIB06gUcsr3vwrN"; // Replace with your actual API key
             string apiUrl = $"https://api.thecatapi.com/v1/images/search?limit=25&api_key={apiKey}";
             var response = await _httpClient.GetAsync(apiUrl);
