@@ -2,26 +2,20 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Text.Json;
-
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-
 using Microsoft.EntityFrameworkCore;
-//using StealAllTheCats.Data;
-//using StealAllTheCats.Models;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-
 using System.Data; 
 using StealAllTheCats.Models;
 using StealAllTheCats.Data;
 using StealAllTheCats.DTOs;
+using System.ComponentModel.DataAnnotations;
 
-
-//namespace MyApp.Namespace
 namespace StealAllTheCats.Controllers
 {
     [Route("api/[controller]")]
@@ -82,6 +76,17 @@ namespace StealAllTheCats.Controllers
                     ImageUrl = cat.url,
                     Created = DateTime.UtcNow
                 };
+
+                // Manually validate the newCat object
+                var validationResults = new List<ValidationResult>();
+                var isValid = Validator.TryValidateObject(newCat, new ValidationContext(newCat), validationResults, true);
+
+                if (!isValid)
+                {
+                    // Collect all validation error messages
+                    var errorMessages = validationResults.Select(vr => vr.ErrorMessage).ToList();
+                    return BadRequest(new { Errors = errorMessages });
+                }
 
                 // Get the temperament tags
                 var tags = cat.breeds[0].temperament.Split(',')
