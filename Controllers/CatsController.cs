@@ -13,8 +13,9 @@ using System.Linq;
 using System.Data; 
 using StealAllTheCats.Models;
 using StealAllTheCats.Data;
-using StealAllTheCats.DTOs;
+//using StealAllTheCats.DTOs;
 using System.ComponentModel.DataAnnotations;
+using StealAllTheCats.Dtos;
 
 namespace StealAllTheCats.Controllers
 {
@@ -206,14 +207,33 @@ namespace StealAllTheCats.Controllers
 
             var totalCats = await query.CountAsync();
 
+            // var cats = await query
+            //     .Include(c => c.CatTags)
+            //     .ThenInclude(ct => ct.TagEntity) // Include the related TagEntity for each tag
+            //     .OrderBy(c => c.Id)
+            //     .Skip((page - 1) * pageSize)
+            //     .Take(pageSize)
+            //     .ToListAsync();
+
+            //Fix Serialization Issue
             var cats = await query
                 .Include(c => c.CatTags)
-                .ThenInclude(ct => ct.TagEntity) // Include the related TagEntity for each tag
+                .ThenInclude(ct => ct.TagEntity)
                 .OrderBy(c => c.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
-
+                .Select(c => new CatDto
+                {
+                    Id = c.Id,
+                    CatId = c.CatId,
+                    Width = c.Width,
+                    Height = c.Height,
+                    Image = c.ImageUrl,
+                    Created = c.Created,
+                    Tags = c.CatTags.Select(ct => ct.TagEntity.Name).ToList()
+                })
+                .ToListAsync();    
+            //return Ok(cats);
             var response = new
             {
                 TotalCats = totalCats,

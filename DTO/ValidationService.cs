@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace StealAllTheCats.DTOs
+namespace StealAllTheCats.Dtos
 {
     public class CatDTO
     {
