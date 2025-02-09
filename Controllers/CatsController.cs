@@ -93,11 +93,16 @@ namespace StealAllTheCats.Controllers
                     .Select(t => t.Trim()) // Trim any extra spaces
                     .Where(t => !string.IsNullOrEmpty(t)) // Ensure non-empty tags
                     .ToList();
-                //return Ok(tags);
+                
                 var newTags = new List<TagEntity>();
 
                 foreach (var tagName in tags)
                 {
+                    // Validate tag name before saving
+                    if (string.IsNullOrEmpty(tagName))
+                    {
+                        continue; // Skip invalid tags
+                    }
                     // Check if the tag already exists
                     var existingTag = await _context.Tags
                         .FirstOrDefaultAsync(t => t.Name == tagName);
@@ -110,6 +115,16 @@ namespace StealAllTheCats.Controllers
                             Name = tagName,
                             Created = DateTime.UtcNow
                         };
+
+                        // Validate the new tag object before adding it to DB
+                        var tagValidationResults = new List<ValidationResult>();
+                        var isTagValid = Validator.TryValidateObject(newTag, new ValidationContext(newTag), tagValidationResults, true);
+
+                        if (!isTagValid)
+                        {
+                            var tagErrorMessages = tagValidationResults.Select(vr => vr.ErrorMessage).ToList();
+                            return BadRequest(new { Errors = tagErrorMessages });
+                        }
 
                         _context.Tags.Add(newTag);
                         newTags.Add(newTag); // Add the new tag to the list of tags
@@ -155,6 +170,12 @@ namespace StealAllTheCats.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCatById(int id)
         {
+            // Validate that the id is a positive number
+            if (id <= 0)
+            {
+                return BadRequest("Invalid Cat ID. ID must be greater than 0.");
+            }
+
             var cat = await _context.Cats
                 .FirstOrDefaultAsync(c=>c.Id==id);
             if(cat==null){
