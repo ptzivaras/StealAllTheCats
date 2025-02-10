@@ -21,17 +21,20 @@ namespace StealAllTheCats.Controllers
         private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _context;
         private readonly CatService _catService;
+        private readonly IConfiguration _configuration;
 
         private static readonly List<CatEntity> _cats = new(); // Temporary storage
-        public CatsController(ApplicationDbContext context, CatService catService)
+        public CatsController(ApplicationDbContext context, CatService catService, IConfiguration configuration)
         {
             _httpClient = new HttpClient();
             _context = context;
             _catService = catService; // ✅ Assign injected service
+            
+            _configuration = configuration;
         }
  
 
-/// <summary>
+        /// <summary>
         /// Fetches 25 cat images from TheCatAPI and saves them in the database.
         /// </summary>
         /// <returns>Returns a success message if cats are added.</returns>
@@ -46,8 +49,16 @@ namespace StealAllTheCats.Controllers
         {
             Console.WriteLine("[DEBUG] Fetch function called!");
 
-            string apiKey = "live_r28aR40CbiGE2ucr7fiQVsNiCfACtX0VopUMAMWk1YCxiUxOCgIB06gUcsr3vwrN"; // Replace with your API key
+            //string apiKey = "live_r28aR40CbiGE2ucr7fiQVsNiCfACtX0VopUMAMWk1YCxiUxOCgIB06gUcsr3vwrN";
+            var apiKey = _configuration["CatApi:ApiKey"];
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                //_logger.LogError("API Key is missing from configuration.");
+                return StatusCode(500, "Server configuration error: API key missing.");
+            }
             string apiUrl = $"https://api.thecatapi.com/v1/images/search?limit=25&api_key={apiKey}";
+
+
             var response = await _httpClient.GetAsync(apiUrl);
 
             if (!response.IsSuccessStatusCode)
@@ -68,6 +79,7 @@ namespace StealAllTheCats.Controllers
             Console.WriteLine($"[DEBUG] Retrieved {fetchedCats.Count} cats from API");
 
             var newCats = new List<CatEntity>();
+    
 
             foreach (var cat in fetchedCats)
             {
@@ -107,7 +119,7 @@ namespace StealAllTheCats.Controllers
                 newCats.Add(newCat);
             }
 
-            // ✅ Check if `SaveCatsToDatabaseAsync` is being called
+            //Check if `SaveCatsToDatabaseAsync` is being called
             Console.WriteLine($"[DEBUG] Sending {newCats.Count} new cats to service...");
 
             int catsSaved = await _catService.SaveCatsToDatabaseAsync(newCats);

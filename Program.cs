@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using StealAllTheCats.Data;
 using StealAllTheCats.Services;
+using StealAllTheCats.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);//? τι κανει?
 
@@ -30,7 +31,7 @@ builder.Services.AddSwaggerGen(options =>
     var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
-
+builder.Services.Configure<CatApiSettings>(builder.Configuration.GetSection("CatApi"));
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
