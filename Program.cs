@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using StealAllTheCats.Data;
+using StealAllTheCats.Services;
 
 var builder = WebApplication.CreateBuilder(args);//? τι κανει?
 
@@ -32,6 +33,8 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<CatService>();
 
 var app = builder.Build();
 

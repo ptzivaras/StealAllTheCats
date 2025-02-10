@@ -9,7 +9,7 @@
             API Controller for Managing Cats
             </summary>
         </member>
-        <member name="M:StealAllTheCats.Controllers.CatsController.SaveUniqueCats">
+        <member name="M:StealAllTheCats.Controllers.CatsController.SaveUniqueCats(StealAllTheCats.Services.CatService)">
             <summary>
             Fetches 25 cat images from TheCatAPI and saves them in the database.
             </summary>

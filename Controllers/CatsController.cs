@@ -1,21 +1,12 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 using System.Text.Json;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
 using System.Data; 
 using StealAllTheCats.Models;
 using StealAllTheCats.Data;
-//using StealAllTheCats.DTOs;
 using System.ComponentModel.DataAnnotations;
 using StealAllTheCats.Dtos;
+using StealAllTheCats.Services;
 
 namespace StealAllTheCats.Controllers
 {
@@ -28,18 +19,19 @@ namespace StealAllTheCats.Controllers
     {
 
         private readonly HttpClient _httpClient;
-        //private readonly AppDbContext _context;
         private readonly ApplicationDbContext _context;
+        private readonly CatService _catService;
 
         private static readonly List<CatEntity> _cats = new(); // Temporary storage
-        public CatsController(ApplicationDbContext context)
+        public CatsController(ApplicationDbContext context, CatService catService)
         {
             _httpClient = new HttpClient();
             _context = context;
-
+            _catService = catService; // ✅ Assign injected service
         }
  
-        /// <summary>
+
+/// <summary>
         /// Fetches 25 cat images from TheCatAPI and saves them in the database.
         /// </summary>
         /// <returns>Returns a success message if cats are added.</returns>
@@ -50,14 +42,17 @@ namespace StealAllTheCats.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> SaveUniqueCats()
+        public async Task<IActionResult> SaveUniqueCats([FromServices] CatService catService)
         {
-            string apiKey = "live_r28aR40CbiGE2ucr7fiQVsNiCfACtX0VopUMAMWk1YCxiUxOCgIB06gUcsr3vwrN"; // Replace with your actual API key
+            Console.WriteLine("[DEBUG] Fetch function called!");
+
+            string apiKey = "live_r28aR40CbiGE2ucr7fiQVsNiCfACtX0VopUMAMWk1YCxiUxOCgIB06gUcsr3vwrN"; // Replace with your API key
             string apiUrl = $"https://api.thecatapi.com/v1/images/search?limit=25&api_key={apiKey}";
             var response = await _httpClient.GetAsync(apiUrl);
 
             if (!response.IsSuccessStatusCode)
             {
+                Console.WriteLine("[DEBUG] Failed to fetch cats from API");
                 return StatusCode((int)response.StatusCode, "Failed to fetch cats from TheCatAPI");
             }
 
@@ -66,117 +61,63 @@ namespace StealAllTheCats.Controllers
 
             if (fetchedCats == null || fetchedCats.Count == 0)
             {
+                Console.WriteLine("[DEBUG] No cats found in API response");
                 return BadRequest("No cats found.");
             }
 
-            // Convert API response into `CatEntity` and save tags
+            Console.WriteLine($"[DEBUG] Retrieved {fetchedCats.Count} cats from API");
+
             var newCats = new List<CatEntity>();
 
             foreach (var cat in fetchedCats)
             {
-                // Skip cats with no temperament
                 if (cat.breeds == null || cat.breeds.Count == 0 || string.IsNullOrEmpty(cat.breeds[0].temperament))
                     continue;
 
-                // Save the cat
                 var newCat = new CatEntity
                 {
                     CatId = cat.id,
                     Width = cat.width,
                     Height = cat.height,
                     ImageUrl = cat.url,
-                    Created = DateTime.UtcNow
+                    Created = DateTime.UtcNow,
+                    CatTags = new List<CatTag>()
                 };
 
-                // Manually validate the newCat object
                 var validationResults = new List<ValidationResult>();
                 var isValid = Validator.TryValidateObject(newCat, new ValidationContext(newCat), validationResults, true);
 
                 if (!isValid)
                 {
-                    // Collect all validation error messages
                     var errorMessages = validationResults.Select(vr => vr.ErrorMessage).ToList();
                     return BadRequest(new { Errors = errorMessages });
                 }
 
-                // Get the temperament tags
-                var tags = cat.breeds[0].temperament.Split(',')
-                    .Select(t => t.Trim()) // Trim any extra spaces
-                    .Where(t => !string.IsNullOrEmpty(t)) // Ensure non-empty tags
+                var tagNames = cat.breeds[0].temperament.Split(',')
+                    .Select(t => t.Trim())
+                    .Where(t => !string.IsNullOrEmpty(t))
                     .ToList();
-                
-                var newTags = new List<TagEntity>();
 
-                foreach (var tagName in tags)
+                foreach (var tagName in tagNames)
                 {
-                    // Validate tag name before saving
-                    if (string.IsNullOrEmpty(tagName))
-                    {
-                        continue; // Skip invalid tags
-                    }
-                    // Check if the tag already exists
-                    var existingTag = await _context.Tags
-                        .FirstOrDefaultAsync(t => t.Name == tagName);
-
-                    if (existingTag == null)
-                    {
-                        // If not, add the new tag
-                        var newTag = new TagEntity
-                        {
-                            Name = tagName,
-                            Created = DateTime.UtcNow
-                        };
-
-                        // Validate the new tag object before adding it to DB
-                        var tagValidationResults = new List<ValidationResult>();
-                        var isTagValid = Validator.TryValidateObject(newTag, new ValidationContext(newTag), tagValidationResults, true);
-
-                        if (!isTagValid)
-                        {
-                            var tagErrorMessages = tagValidationResults.Select(vr => vr.ErrorMessage).ToList();
-                            return BadRequest(new { Errors = tagErrorMessages });
-                        }
-
-                        _context.Tags.Add(newTag);
-                        newTags.Add(newTag); // Add the new tag to the list of tags
-                    }
-                    else
-                    {
-                        newTags.Add(existingTag); // Add the existing tag to the list
-                    }
+                    var tag = new TagEntity { Name = tagName, Created = DateTime.UtcNow };
+                    newCat.CatTags.Add(new CatTag { TagEntity = tag });
                 }
 
-                // Add the cat to the list
                 newCats.Add(newCat);
-
-                // Create relationships (CatTag) in the pivot table
-                foreach (var tag in newTags)
-                {
-                    _context.CatTags.Add(new CatTag
-                    {
-                        CatEntity = newCat,
-                        TagEntity = tag
-                    });
-                }
             }
 
-            // Check for duplicates before inserting
-            var existingCatIds = _context.Cats.Select(c => c.CatId).ToList();
-            var uniqueCats = newCats.Where(c => !existingCatIds.Contains(c.CatId)).ToList();
+            // ✅ Check if `SaveCatsToDatabaseAsync` is being called
+            Console.WriteLine($"[DEBUG] Sending {newCats.Count} new cats to service...");
 
-            if (uniqueCats.Any())
-            {
-                _context.Cats.AddRange(uniqueCats);
-                await _context.SaveChangesAsync();
-                return Ok($"Successfully added {uniqueCats.Count} new cats.");
-            }
+            int catsSaved = await _catService.SaveCatsToDatabaseAsync(newCats);
 
-            return Ok("No new cats were added (duplicates detected or no temperament).");
+            Console.WriteLine($"[DEBUG] Service returned {catsSaved} saved cats");
+
+            return Ok(catsSaved > 0 ? $"Successfully added {catsSaved} new cats." : "No new cats were added (duplicates detected).");
         }
 
-
-
-
+        
         /// <summary>
         /// Retrieves a cat by its ID.
         /// </summary>
@@ -201,8 +142,6 @@ namespace StealAllTheCats.Controllers
             return Ok(cat); // Returns raw JSON response from TheCatAPI
         }
     
-
-
 
         /// <summary>
         /// Retrieves Posted Cats
