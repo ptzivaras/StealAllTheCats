@@ -39,9 +39,17 @@ namespace StealAllTheCats.Controllers
 
         }
  
-        //First Endpoint(Post 25 cats in LocalServer after you get them from Cat Server)
-        //POST /api/cats/fetch
+        /// <summary>
+        /// Fetches 25 cat images from TheCatAPI and saves them in the database.
+        /// </summary>
+        /// <returns>Returns a success message if cats are added.</returns>
+        /// <response code="200">Successfully added cats.</response>
+        /// <response code="400">Bad request (invalid input or validation failure).</response>
+        /// <response code="500">Internal server error.</response>
         [HttpPost("fetch")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> SaveUniqueCats()
         {
             string apiKey = "live_r28aR40CbiGE2ucr7fiQVsNiCfACtX0VopUMAMWk1YCxiUxOCgIB06gUcsr3vwrN"; // Replace with your actual API key
@@ -168,8 +176,14 @@ namespace StealAllTheCats.Controllers
 
 
 
-        //Second EndPoint(Get Cat By id)
-        //GET /api/cats/{id}:
+
+        /// <summary>
+        /// Retrieves a cat by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the cat to retrieve.</param>
+        /// <returns>Returns the requested cat.</returns>
+        /// <response code="200">Returns the cat.</response>
+        /// <response code="404">Cat not found.</response>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCatById(int id)
         {

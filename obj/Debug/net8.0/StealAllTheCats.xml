@@ -9,6 +9,24 @@
             API Controller for Managing Cats
             </summary>
         </member>
+        <member name="M:StealAllTheCats.Controllers.CatsController.SaveUniqueCats">
+            <summary>
+            Fetches 25 cat images from TheCatAPI and saves them in the database.
+            </summary>
+            <returns>Returns a success message if cats are added.</returns>
+            <response code="200">Successfully added cats.</response>
+            <response code="400">Bad request (invalid input or validation failure).</response>
+            <response code="500">Internal server error.</response>
+        </member>
+        <member name="M:StealAllTheCats.Controllers.CatsController.GetCatById(System.Int32)">
+            <summary>
+            Retrieves a cat by its ID.
+            </summary>
+            <param name="id">The ID of the cat to retrieve.</param>
+            <returns>Returns the requested cat.</returns>
+            <response code="200">Returns the cat.</response>
+            <response code="404">Cat not found.</response>
+        </member>
         <member name="M:StealAllTheCats.Controllers.CatsController.GetCatsByTag(System.String,System.Int32,System.Int32)">
             <summary>
             Retrieves Posted Cats
