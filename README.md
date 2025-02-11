@@ -11,8 +11,6 @@
 
 # Installation & Setup
   1. Clone the Repository
-  git clone https://github.com/your-username/StealAllTheCats.git
-  cd StealAllTheCats
   2. Configure the Database
   Open appsettings.json and update the database info and api-key
   Ensure your SQL Server is running and configured to accept connections.
